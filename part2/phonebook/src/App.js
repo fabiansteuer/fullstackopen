@@ -2,15 +2,11 @@ import { useState, useEffect } from "react";
 import Search from "./components/Search";
 import PersonForm from "./components/PersonForm";
 import Persons from "./components/Persons";
+import personService from "./services/persons";
 import axios from "axios";
 
 const App = () => {
-  const [persons, setPersons] = useState([
-    { name: "Fabian", number: 1234567890 },
-    { name: "Ganesh", number: 1234567890 },
-    { name: "Sammy", number: 1234567890 },
-  ]);
-
+  const [persons, setPersons] = useState([]);
   const [newName, setNewName] = useState("");
   const [newNumber, setNewNumber] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
@@ -30,22 +26,62 @@ const App = () => {
   const addPerson = (event) => {
     event.preventDefault();
 
-    if (persons.find((person) => person.name === newName)) {
-      alert(`${newName} is already in the phonebook.`);
+    const existingPerson = persons.find((person) => person.name === newName);
+    if (existingPerson) {
+      if (window.confirm(`Update ${newName}'s phone number?`)) {
+        const updatedPerson = { ...existingPerson, number: newNumber };
+        personService
+          .update(existingPerson.id, updatedPerson)
+          .then((response) => {
+            setPersons(
+              persons.map((person) =>
+                person.id !== response.id ? person : response
+              )
+            );
+            setNewName("");
+            setNewNumber("");
+          });
+      }
       return;
     }
 
     const newPerson = { name: newName, number: newNumber };
-    setPersons(persons.concat(newPerson));
+    personService
+      .create(newPerson)
+      .then((createdPerson) => {
+        setPersons(persons.concat(createdPerson));
+        setNewName("");
+        setNewNumber("");
+      })
+      .catch(() => {
+        console.log("Failed to create person.");
+      });
+  };
 
-    setNewName("");
-    setNewNumber("");
+  const deletePerson = (person) => {
+    const personId = person.id;
+
+    return () => {
+      if (window.confirm(`Delete ${person.name}?`)) {
+        personService
+          .remove(person.id)
+          .then(() => {
+            setPersons(persons.filter((p) => p.id !== person.id));
+          })
+          .catch(() => {
+            console.log("Failed to delete person.");
+          });
+      }
+    };
   };
 
   useEffect(() => {
-    axios
-      .get("http://localhost:3001/persons")
-      .then((response) => setPersons(response.data));
+    personService
+      .getAll()
+      .then((persons) => setPersons(persons))
+      .catch(() => {
+        console.log("Failed to get persons.");
+      });
   }, []);
 
   return (
@@ -64,7 +100,11 @@ const App = () => {
         addPerson={addPerson}
       />
       <h2>Numbers</h2>
-      <Persons persons={persons} searchTerm={searchTerm} />
+      <Persons
+        persons={persons}
+        searchTerm={searchTerm}
+        deletePerson={deletePerson}
+      />
     </div>
   );
 };
