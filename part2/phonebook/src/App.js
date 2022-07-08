@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import Search from "./components/Search";
 import PersonForm from "./components/PersonForm";
 import Persons from "./components/Persons";
+import Message from "./components/Message";
 import personService from "./services/persons";
 import axios from "axios";
 
@@ -10,6 +11,8 @@ const App = () => {
   const [newName, setNewName] = useState("");
   const [newNumber, setNewNumber] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
+  const [message, setMessage] = useState("");
+  const [messageType, setMessageType] = useState("");
 
   const handleNameChange = (event) => {
     setNewName(event.target.value);
@@ -40,6 +43,19 @@ const App = () => {
             );
             setNewName("");
             setNewNumber("");
+            setMessage("Person updated.");
+            setMessageType("success");
+            setTimeout(() => {
+              setMessage("");
+            }, 5000);
+          })
+          .catch(() => {
+            console.log("Failed to update person.");
+            setMessage("Failed to update person.");
+            setMessageType("error");
+            setTimeout(() => {
+              setMessage("");
+            }, 5000);
           });
       }
       return;
@@ -52,9 +68,19 @@ const App = () => {
         setPersons(persons.concat(createdPerson));
         setNewName("");
         setNewNumber("");
+        setMessage("Person added.");
+        setMessageType("success");
+        setTimeout(() => {
+          setMessage("");
+        }, 5000);
       })
       .catch(() => {
         console.log("Failed to create person.");
+        setMessage("Failed to create person.");
+        setMessageType("error");
+        setTimeout(() => {
+          setMessage("");
+        }, 5000);
       });
   };
 
@@ -67,9 +93,19 @@ const App = () => {
           .remove(person.id)
           .then(() => {
             setPersons(persons.filter((p) => p.id !== person.id));
+            setMessage("Person deleted.");
+            setMessageType("success");
+            setTimeout(() => {
+              setMessage("");
+            }, 5000);
           })
           .catch(() => {
             console.log("Failed to delete person.");
+            setMessage("Failed to delete person.");
+            setMessageType("error");
+            setTimeout(() => {
+              setMessage("");
+            }, 5000);
           });
       }
     };
@@ -81,6 +117,11 @@ const App = () => {
       .then((persons) => setPersons(persons))
       .catch(() => {
         console.log("Failed to get persons.");
+        setMessage("Failed to get persons.");
+        setMessageType("error");
+        setTimeout(() => {
+          setMessage("");
+        }, 5000);
       });
   }, []);
 
@@ -99,6 +140,7 @@ const App = () => {
         handleNumberChange={handleNumberChange}
         addPerson={addPerson}
       />
+      <Message message={message} type={messageType} />
       <h2>Numbers</h2>
       <Persons
         persons={persons}
