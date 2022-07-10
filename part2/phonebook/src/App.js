@@ -4,7 +4,6 @@ import PersonForm from "./components/PersonForm";
 import Persons from "./components/Persons";
 import Message from "./components/Message";
 import personService from "./services/persons";
-import axios from "axios";
 
 const App = () => {
   const [persons, setPersons] = useState([]);
@@ -85,8 +84,6 @@ const App = () => {
   };
 
   const deletePerson = (person) => {
-    const personId = person.id;
-
     return () => {
       if (window.confirm(`Delete ${person.name}?`)) {
         personService
