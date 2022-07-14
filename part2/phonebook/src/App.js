@@ -48,9 +48,10 @@ const App = () => {
               setMessage("");
             }, 5000);
           })
-          .catch(() => {
-            console.log("Failed to update person.");
-            setMessage("Failed to update person.");
+          .catch((error) => {
+            const errorMessage = error.response.data.error;
+            console.error(errorMessage);
+            setMessage(`Failed to update person because ${errorMessage}`);
             setMessageType("error");
             setTimeout(() => {
               setMessage("");
@@ -73,9 +74,10 @@ const App = () => {
           setMessage("");
         }, 5000);
       })
-      .catch(() => {
-        console.log("Failed to create person.");
-        setMessage("Failed to create person.");
+      .catch((error) => {
+        const errorMessage = error.response.data.error;
+        console.error(errorMessage);
+        setMessage(`Failed to create person because ${errorMessage}`);
         setMessageType("error");
         setTimeout(() => {
           setMessage("");
